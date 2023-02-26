@@ -1,0 +1,40 @@
+<html>
+  <body>
+    <button onclick="upload()">Upload Large Payload</button>
+    <script>
+      const apiEndpoint = "https://<your-api-gateway-endpoint>/dev/s3url";
+      const todosEndpoint = "http://jsonplaceholder.typicode.com/todos";
+
+      upload = async () => {
+        const todos = await getTodos();
+        const data = await getSignedUrl();
+        const result = await uploadToS3(data.url, todos);
+        console.log("Successfully Uploaded to S3");
+      };
+
+      getTodos = async () => {
+        return fetch(todosEndpoint)
+          .then((res) => res.json())
+          .then((data) => data);
+      };
+
+      getSignedUrl = async () => {
+        return fetch(apiEndpoint)
+          .then((res) => res.json())
+          .then((data) => data);
+      };
+
+      uploadToS3 = async (url, todos) => {
+        return fetch(url, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ todos }),
+        })
+          .then((res) => res.text())
+          .then((data) => data);
+      };
+    </script>
+  </body>
+</html>

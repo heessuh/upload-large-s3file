@@ -1,0 +1,30 @@
+service: youtubeAPI
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:PutObject"
+        - "s3:GetObject"
+        - "sns:Publish"
+      Resource: arn:aws:s3:::<your-uniq-s3-bucket-name>/*
+
+functions:
+  getSignedUrl:
+    handler: handler.getSignedUrl
+    events:
+      - http:
+          path: s3url
+          method: get
+          cors: true
+
+  executePayload:
+    handler: handler.executePayload
+    destinations:
+      onSuccess: <your-sns-topic-arn>
+    events:
+      - s3:
+          bucket: <your-uniq-s3-bucket-name>
+          event: s3:ObjectCreated:*
